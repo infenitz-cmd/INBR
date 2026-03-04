@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍦 Baskin Robbins — Inventory System</title>
+  <meta name="description" content="Ice Cream Shop Inventory Management System for Baskin Robbins" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@700;800;900&display=swap"
+    rel="stylesheet" />
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ec4899" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+</head>
+
+<body>
+
+  <!-- ══════════════════════════════════════════
+     LOGIN PAGE
+══════════════════════════════════════════ -->
+  <div id="login-page" class="login-page">
+    <div class="login-bg-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
+    <div class="login-card glass-card">
+      <div class="login-brand">
+        <div class="brand-logo-icon">
+          <i class="ph ph-ice-cream"></i>
+        </div>
+        <h1 class="brand-name">Baskin Robbins</h1>
+        <p class="brand-tagline">Inventory Management System</p>
+      </div>
+      <form id="login-form" class="login-form" autocomplete="off">
+        <div class="form-group">
+          <label for="login-username"><i class="ph ph-user"></i> Username</label>
+          <input type="text" id="login-username" placeholder="Enter username" required />
+        </div>
+        <div class="form-group">
+          <label for="login-password"><i class="ph ph-lock"></i> Password</label>
+          <div class="password-wrap">
+            <input type="password" id="login-password" placeholder="Enter password" required />
+            <button type="button" id="toggle-password" class="toggle-pw"><i class="ph ph-eye"></i></button>
+          </div>
+        </div>
+        <p id="login-error" class="login-error hidden">Invalid username or password.</p>
+        <button type="submit" class="btn btn-primary btn-full">
+          <i class="ph ph-sign-in"></i> Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+     MAIN APP LAYOUT
+══════════════════════════════════════════ -->
+  <div id="app" class="app-layout hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo-icon">
+          <i class="ph ph-ice-cream"></i>
+        </div>
+        <div>
+          <h2>Baskin</h2>
+          <span>Robbins</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-view="dashboard">
+          <i class="ph ph-house"></i><span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-view="inventory">
+          <i class="ph ph-package"></i><span>Inventory</span>
+          <span class="low-stock-badge hidden" id="sidebar-low-badge"></span>
+        </a>
+        <a href="#" class="nav-item" data-view="attendance">
+          <i class="ph ph-clock"></i><span>Attendance</span>
+        </a>
+        <a href="#" class="nav-item admin-only" data-view="reports">
+          <i class="ph ph-chart-bar"></i><span>Reports</span>
+        </a>
+        <a href="#" class="nav-item admin-only" data-view="settings">
+          <i class="ph ph-gear"></i><span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-chip" id="user-chip">
+          <div class="user-avatar" id="user-avatar">A</div>
+          <div>
+            <p class="user-name" id="user-name">Admin</p>
+            <p class="user-role" id="user-role">Administrator</p>
+          </div>
+        </div>
+        <button class="btn-logout" id="logout-btn" title="Logout">
+          <i class="ph ph-sign-out"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MOBILE TOPBAR -->
+    <header class="topbar">
+      <button id="sidebar-toggle" class="btn-icon"><i class="ph ph-list"></i></button>
+      <h1 class="topbar-title" id="page-title">Dashboard</h1>
+      <div class="topbar-right">
+        <button class="btn-icon" id="topbar-logout" title="Logout"><i class="ph ph-sign-out"></i></button>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- ── DASHBOARD ── -->
+      <section id="view-dashboard" class="view active">
+        <div class="view-header">
+          <div>
+            <h2>Dashboard</h2>
+            <p class="subtitle" id="dashboard-greeting">Welcome back!</p>
+          </div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card stat-card--blue">
+            <div class="stat-icon"><i class="ph ph-package"></i></div>
+            <div class="stat-body">
+              <p class="stat-label">Total Items</p>
+              <h3 class="stat-value" id="stat-total">0</h3>
+            </div>
+          </div>
+          <div class="stat-card stat-card--green">
+            <div class="stat-icon"><i class="ph ph-check-circle"></i></div>
+            <div class="stat-body">
+              <p class="stat-label">In Stock</p>
+              <h3 class="stat-value" id="stat-instock">0</h3>
+            </div>
+          </div>
+          <div class="stat-card stat-card--red">
+            <div class="stat-icon"><i class="ph ph-warning-circle"></i></div>
+            <div class="stat-body">
+              <p class="stat-label">Low Stock</p>
+              <h3 class="stat-value" id="stat-low">0</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+          <div class="card chart-card">
+            <h4 class="card-title"><i class="ph ph-chart-bar"></i> Stock by Category</h4>
+            <canvas id="chart-category"></canvas>
+          </div>
+          <div class="card chart-card">
+            <h4 class="card-title"><i class="ph ph-chart-donut"></i> Category Distribution</h4>
+            <canvas id="chart-donut"></canvas>
+          </div>
+        </div>
+
+        <!-- Low Stock Alerts -->
+        <div class="card" id="low-stock-section">
+          <h4 class="card-title"><i class="ph ph-warning" style="color:var(--red)"></i> Low Stock Alerts</h4>
+          <div id="low-stock-list" class="low-stock-list"></div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="card">
+          <h4 class="card-title"><i class="ph ph-clock-counter-clockwise"></i> Recent Activity</h4>
+          <div id="recent-transactions" class="recent-tx-list"></div>
+        </div>
+      </section>
+
+      <!-- ── INVENTORY ── -->
+      <section id="view-inventory" class="view">
+        <div class="view-header">
+          <div>
+            <h2>Inventory</h2>
+            <p class="subtitle">Manage your stock items</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-ghost admin-only" id="export-stock-btn" title="Download Stock Sheet">
+              <i class="ph ph-download"></i> Export Stock
+            </button>
+            <button class="btn btn-primary admin-only" id="add-item-btn">
+              <i class="ph ph-plus"></i> Add Item
+            </button>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-row">
+          <div class="search-wrap">
+            <i class="ph ph-magnifying-glass"></i>
+            <input type="text" id="inventory-search" placeholder="Search items..." />
+          </div>
+          <select id="filter-category" class="filter-select">
+            <option value="">All Categories</option>
+            <option value="Bulk">📦 Bulk</option>
+            <option value="Roll cakes">🍥 Roll cakes</option>
+            <option value="Cakes">🎂 Cakes</option>
+            <option value="Toppings">🍫 Toppings</option>
+            <option value="Bakery">🥐 Bakery</option>
+            <option value="Packaging">🥡 Packaging</option>
+            <option value="Supplies">🛠️ Supplies</option>
+          </select>
+          <select id="filter-stock" class="filter-select">
+            <option value="">All Stock Status</option>
+            <option value="in">In Stock</option>
+            <option value="low">Low Stock</option>
+            <option value="out">Out of Stock</option>
+          </select>
+        </div>
+
+        <!-- Table -->
+        <div class="card table-card">
+          <div class="table-wrap">
+            <table class="data-table" id="inventory-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Category</th>
+                  <th>Quantity</th>
+                  <th>Status</th>
+                  <th class="admin-only">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-tbody">
+                <!-- JS renders rows -->
+              </tbody>
+            </table>
+            <div id="inventory-empty" class="empty-state hidden">
+              <span class="empty-icon">📦</span>
+              <p>No items found</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── ATTENDANCE ── -->
+      <section id="view-attendance" class="view">
+        <div class="view-header">
+          <div>
+            <h2>Attendance Management</h2>
+            <p class="subtitle" id="attendance-subtitle">Track your work hours</p>
+          </div>
+        </div>
+
+        <!-- Staff Clock In/Out Section -->
+        <div id="staff-attendance-controls" class="card staff-only" style="text-align: center; padding: 2.5rem 1rem;">
+          <div class="clock-display">
+            <h1 id="current-time">00:00:00</h1>
+            <p id="current-date">Fetching date...</p>
+          </div>
+          <div class="attendance-status" id="attendance-status-box">
+            <span class="status-dot"></span>
+            <span id="current-status-text">Not Clocked In</span>
+          </div>
+          <div class="clock-actions" style="margin-top: 2rem;">
+            <button class="btn btn-lg btn-success" id="clock-in-btn">
+              <i class="ph ph-sign-in"></i> Clock In
+            </button>
+            <button class="btn btn-lg btn-danger hidden" id="clock-out-btn">
+              <i class="ph ph-sign-out"></i> Clock Out
+            </button>
+          </div>
+        </div>
+
+        <!-- Logs Search Filter for Admin -->
+        <div class="filters-row admin-only">
+          <div class="search-wrap">
+            <i class="ph ph-magnifying-glass"></i>
+            <input type="text" id="attendance-search" placeholder="Search by name or username..." />
+          </div>
+          <select id="attendance-filter-role" class="filter-select">
+            <option value="">All Users</option>
+          </select>
+        </div>
+
+        <!-- Attendance Logs Table -->
+        <div class="card table-card" style="margin-top: 1.5rem;">
+          <h4 class="card-title"><i class="ph ph-list-numbers"></i> Attendance History</h4>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th class="admin-only">Staff Name</th>
+                  <th>Clock In</th>
+                  <th>Clock Out</th>
+                  <th>Duration</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="attendance-tbody"></tbody>
+            </table>
+            <div id="attendance-empty" class="empty-state hidden">
+              <span class="empty-icon">🕒</span>
+              <p>No attendance logs found</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── REPORTS ── -->
+      <section id="view-reports" class="view admin-only">
+        <div class="view-header">
+          <div>
+            <h2>Reports</h2>
+            <p class="subtitle">Monthly inventory summary</p>
+          </div>
+          <button class="btn btn-success" id="export-csv-btn">
+            <i class="ph ph-download-simple"></i> Export CSV
+          </button>
+        </div>
+
+        <div class="card" style="padding:1.25rem;">
+          <div class="filters-row" style="margin-bottom:0;">
+            <select id="report-year" class="filter-select"></select>
+            <select id="report-month" class="filter-select">
+              <option value="1">January</option>
+              <option value="2">February</option>
+              <option value="3">March</option>
+              <option value="4">April</option>
+              <option value="5">May</option>
+              <option value="6">June</option>
+              <option value="7">July</option>
+              <option value="8">August</option>
+              <option value="9">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+            <button class="btn btn-primary" id="apply-report-btn">
+              <i class="ph ph-funnel"></i> Apply
+            </button>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="report-stats">
+          <div class="stat-card stat-card--blue">
+            <div class="stat-icon"><i class="ph ph-users"></i></div>
+            <div class="stat-body">
+              <p class="stat-label">Total Staff</p>
+              <h3 class="stat-value" id="r-items">0</h3>
+            </div>
+          </div>
+          <div class="stat-card stat-card--green">
+            <div class="stat-icon"><i class="ph ph-calendar-check"></i></div>
+            <div class="stat-body">
+              <p class="stat-label">Total Sessions</p>
+              <h3 class="stat-value" id="r-added">0</h3>
+            </div>
+          </div>
+          <div class="stat-card stat-card--red">
+            <div class="stat-icon"><i class="ph ph-timer"></i></div>
+            <div class="stat-body">
+              <p class="stat-label">Total Hours</p>
+              <h3 class="stat-value" id="r-sold">0</h3>
+            </div>
+          </div>
+          <div class="stat-card stat-card--pink">
+            <div class="stat-icon"><i class="ph ph-chart-line-up"></i></div>
+            <div class="stat-body">
+              <p class="stat-label">Avg Hrs/Staff</p>
+              <h3 class="stat-value" id="r-net">0</h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Staff Name</th>
+                  <th>Total Sessions</th>
+                  <th>Total Hours</th>
+                  <th colspan="3"></th>
+                </tr>
+              </thead>
+              <tbody id="report-tbody"></tbody>
+            </table>
+            <div id="report-empty" class="empty-state hidden">
+              <span class="empty-icon">📈</span>
+              <p>No data for selected period</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SETTINGS ── -->
+      <section id="view-settings" class="view admin-only">
+        <div class="view-header">
+          <div>
+            <h2>Settings</h2>
+            <p class="subtitle">Manage users and application settings</p>
+          </div>
+        </div>
+
+        <div class="settings-grid">
+          <!-- Manage Staff Accounts -->
+          <div class="card settings-card" style="grid-column: span 2;">
+            <h4 class="card-title"><i class="ph ph-users-three"></i> Manage Staff Accounts</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem;">
+              <div>
+                <h5 style="margin-bottom: 0.75rem; font-size: 0.9rem;">Create New Staff Profile</h5>
+                <form id="add-staff-form" class="login-form">
+                  <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="staff-display-name" placeholder="e.g. John Doe" required />
+                  </div>
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label>Username</label>
+                      <input type="text" id="staff-username" placeholder="Username" required />
+                    </div>
+                    <div class="form-group">
+                      <label>Password</label>
+                      <input type="password" id="staff-password" placeholder="Password" required />
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary" style="margin-top:0.5rem;">Create Staff Account</button>
+                </form>
+              </div>
+              <div>
+                <h5 style="margin-bottom: 0.75rem; font-size: 0.9rem;">Existing Staff</h5>
+                <div class="table-wrap"
+                  style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Username</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="staff-list-tbody">
+                      <!-- Rendered by JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Change Password -->
+          <div class="card settings-card">
+            <h4 class="card-title"><i class="ph ph-lock"></i> Change Admin Password</h4>
+            <form id="change-password-form">
+              <div class="form-group">
+                <label>Current Password</label>
+                <input type="password" id="current-pw" placeholder="Current password" />
+              </div>
+              <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="new-pw" placeholder="New password" />
+              </div>
+              <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" id="confirm-pw" placeholder="Confirm new password" />
+              </div>
+              <p id="pw-error" class="error-text hidden" style="margin-top:0.5rem;text-align:center;"></p>
+              <button type="submit" class="btn btn-primary">Update Password</button>
+            </form>
+            <hr style="margin: 1.5rem 0; border-color: var(--border);">
+            <div style="text-align: center;">
+              <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.75rem;">Dangerous Action</p>
+              <button class="btn btn-danger btn-sm" id="reset-data-btn">
+                <i class="ph ph-trash"></i> Reset All Data
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+     ADD / EDIT ITEM MODAL
+══════════════════════════════════════════ -->
+  <div id="item-modal" class="modal-overlay hidden">
+    <div class="modal-box" id="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-title">Add Item</h3>
+        <button class="modal-close" id="modal-close-btn"><i class="ph ph-x"></i></button>
+      </div>
+      <form id="item-form" class="modal-form">
+        <input type="hidden" id="item-id" />
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Item Name *</label>
+            <input type="text" id="item-name" placeholder="e.g. Vanilla Ice Cream" required />
+          </div>
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="item-category" required>
+              <option value="">Select Category</option>
+              <option value="Bulk">📦 Bulk</option>
+              <option value="Roll cakes">🍥 Roll cakes</option>
+              <option value="Cakes">🎂 Cakes</option>
+              <option value="Toppings">🍫 Toppings</option>
+              <option value="Bakery">🥐 Bakery</option>
+              <option value="Packaging">🥡 Packaging</option>
+              <option value="Supplies">🛠️ Supplies</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Quantity *</label>
+            <div class="qty-control">
+              <button type="button" class="qty-btn qty-btn--minus" id="qty-minus"><i class="ph ph-minus"></i></button>
+              <input type="number" id="item-quantity" min="0" value="0" required />
+              <button type="button" class="qty-btn qty-btn--plus admin-only" id="qty-plus"><i
+                  class="ph ph-plus"></i></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Low Stock Threshold</label>
+            <input type="number" id="item-threshold" min="0" value="1" disabled />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" id="modal-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modal-save-btn">Save Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+     SALE MODAL (Staff)
+══════════════════════════════════════════ -->
+  <div id="sale-modal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:420px;">
+      <div class="modal-header">
+        <h3>Record Sale</h3>
+        <button class="modal-close" id="sale-modal-close"><i class="ph ph-x"></i></button>
+      </div>
+      <div class="modal-form">
+        <p id="sale-item-name" class="sale-item-name"></p>
+        <div class="form-group">
+          <label>Quantity to Sell</label>
+          <div class="qty-control">
+            <button type="button" class="qty-btn qty-btn--minus" id="sale-qty-minus"><i
+                class="ph ph-minus"></i></button>
+            <input type="number" id="sale-qty" min="1" value="1" />
+            <button type="button" class="qty-btn qty-btn--plus" id="sale-qty-plus"><i class="ph ph-plus"></i></button>
+          </div>
+          <p id="sale-stock-info" class="form-hint"></p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" id="sale-cancel-btn">Cancel</button>
+          <button class="btn btn-primary" id="sale-confirm-btn"><i class="ph ph-check"></i> Confirm Sale</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+     CONFIRM DIALOG
+══════════════════════════════════════════ -->
+  <div id="confirm-dialog" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:400px;">
+      <div class="modal-header">
+        <h3 id="confirm-title">Confirm</h3>
+      </div>
+      <div class="modal-form">
+        <p id="confirm-message" class="confirm-message"></p>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" id="confirm-cancel">Cancel</button>
+          <button class="btn btn-danger" id="confirm-ok">Yes, Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Sidebar overlay for mobile -->
+  <div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
+
+  <!-- Scripts -->
+  <script src="js/db.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/attendance.js"></script>
+  <script src="js/reports.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- Register Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW Registered!', reg))
+          .catch(err => console.log('SW Registration failed:', err));
+      });
+    }
+  </script>
+</body>
+
+</html>
